@@ -168,7 +168,7 @@ function formatBundleInfo(bpBundle, options) {
 
 
 function browserPackFactory(options) {
-  return utils.extend({}, options, { bundler: new Bundler(options) });
+  return utils.extend({}, options, { provider: new Bundler(options) });
 }
 
 
