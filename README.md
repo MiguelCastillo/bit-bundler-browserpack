@@ -1,5 +1,5 @@
 # bit-bundler-browserpack
-JavaScript bit-bundler bundler provider. This bundler provider uses [browser-pack](https://github.com/substack/browser-pack) to create the bundles.
+[bit-bundler](https://github.com/MiguelCastillo/bit-bundler) bundler provider to create JavaScript bundles. This bundler provider uses [browser-pack](https://github.com/substack/browser-pack) as the backing bundle generator.
 
 ### Options
 
@@ -7,7 +7,7 @@ JavaScript bit-bundler bundler provider. This bundler provider uses [browser-pac
 - **`printInfo`** { boolean } (false) - Flag to print out to console basic information about the modules in each generated bundle.
 - **`filePathAsId`** { boolean } (false) - Flag to tell the bundler that modules in the bundles should use the full path as ids instead of the numeric ids.
 
-All options that `browser-pack` takes can be forwarded to the internal instance in a configuration object with `browserPack` as the key.  E.g.
+All options that `browser-pack` takes can be forwarded in a `browserPack` configuration object. However, this should not really be needed for the general case as all options are automatically computed for you by this module.
 
 ``` javascript
 {
@@ -17,8 +17,6 @@ All options that `browser-pack` takes can be forwarded to the internal instance 
   }
 }
 ```
-
-However, this should not really be needed for the general case as all options are automatically computed for you by this module.
 
 ### License
 
