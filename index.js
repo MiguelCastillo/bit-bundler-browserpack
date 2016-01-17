@@ -6,6 +6,10 @@ var utils = require("belty");
 
 
 function Bundler(options) {
+  if (!(this instanceof Bundler)) {
+    return new Bundler(options);
+  }
+
   this._options = utils.merge({}, defaultOptions, options);
   this._getId = this._options.filePathAsId ? utils.noop : getUniqueId;
 }
@@ -167,11 +171,6 @@ function formatBundleInfo(bpBundle, options) {
 }
 
 
-function browserPackFactory(options) {
-  return utils.extend({}, options, { provider: new Bundler(options) });
-}
-
-
 /**
  * Converts array to a map. The resulting map can be used for quick lookup
  * that is more efficient than calling indexOf on the array.
@@ -184,4 +183,4 @@ function arrayToMap(items) {
 }
 
 
-module.exports = browserPackFactory;
+module.exports = Bundler;
