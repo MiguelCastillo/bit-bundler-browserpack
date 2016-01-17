@@ -68,6 +68,11 @@ function configureBrowserPack(bpBundle, options) {
   var bpOptions = utils.merge({}, options.browserPack);
   bpOptions.hasExports = bpBundle.exports.length !== 0;
   bpOptions.standaloneModule = bpBundle.exports;
+
+  if (options.umd) {
+    bpOptions.standalone = options.umd;
+  }
+
   return bpOptions;
 }
 
