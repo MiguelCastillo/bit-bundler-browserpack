@@ -3,6 +3,7 @@ var browserPack = require("browser-pack");
 var getUniqueId = require("bit-bundler-utils/getUniqueId");
 var pstream = require("p-stream");
 var utils = require("belty");
+var path = require("path");
 
 
 function Bundler(options) {
@@ -132,11 +133,12 @@ function getBrowserPackExports(bundler, context) {
 
 function createBrowserPackModule(mod) {
   var bpModule = {
-    id     : mod.id,
-    name   : mod.name,
-    path   : mod.path,
-    source : mod.source,
-    deps   : {}
+    id         : mod.id,
+    name       : mod.name,
+    path       : mod.path,
+    source     : mod.source,
+    sourceFile : path.relative(".", mod.path),
+    deps       : {}
   };
 
   var i, length, dep;
