@@ -3,6 +3,7 @@
 
 ### Options
 
+- **`sourceMap`** { boolean } (true) - Enables/disables the generation of inline source maps.
 - **`umd`** { string } - String name for the `UMD` module to be exported. `UMD` is a configuration that allows bundles to run in node.js, requirejs, and traditional script tags. If running in the browser, provide this setting for maximum compatibility. The name you provide is exported so that other modules can consume the bundle. [This is some literature on it](https://github.com/umdjs/umd).
 - **`printInfo`** { boolean } (false) - Flag to print out to console basic information about the modules in each generated bundle.
 - **`filePathAsId`** { boolean } (false) - Flag to tell the bundler that modules in the bundles should use the full path as ids instead of the numeric ids.

@@ -1,6 +1,7 @@
 {
   "printInfo": false,
   "filePathAsId": false,
+  "sourceMap": true,
   "browserPack": {
     "raw": true,
     "hasExports": true,
