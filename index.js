@@ -3,6 +3,7 @@ var browserPack = require("browser-pack");
 var getUniqueId = require("bit-bundler-utils/getUniqueId");
 var pstream = require("p-stream");
 var utils = require("belty");
+var path = require("path");
 
 
 function Bundler(options) {
@@ -20,21 +21,23 @@ Bundler.prototype.bundle = function(context, options) {
     return Promise.resolve();
   }
 
+  var bpOptions = buildOptions(this, options);
   var bpExports = getBrowserPackExports(this, context);
   var bpModules = createBrowserPackModules(this, context);
-  bpModules = configureIds(this, bpModules);
+  bpModules = configureIds(this, bpModules, bpOptions);
   bpModules = configureEntries(this, bpModules, bpExports);
+  bpModules = configureSourceMap(this, bpModules, bpOptions);
 
   var bpBundle = {
     exports: bpExports,
     modules: bpModules
   };
 
-  if (this._options.printInfo) {
+  if (bpOptions.printInfo) {
     this.printInfo(bpBundle);
   }
 
-  return this.stringify(bpBundle, options).then(function(result) {
+  return this.stringify(bpBundle, bpOptions).then(function(result) {
     //
     // Force converting Buffer to string to prevent buffers from causing
     // issues with utils.merge.
@@ -46,7 +49,8 @@ Bundler.prototype.bundle = function(context, options) {
 
 
 Bundler.prototype.stringify = function(bpBundle, options) {
-  var bp = browserPack(configureBrowserPack(bpBundle, utils.merge({}, this._options, options)));
+  var bpOptions = buildBrowserPackOptions(bpBundle, buildOptions(this, options));
+  var bp = browserPack(bpOptions);
   var deferred = pstream(bp);
   bpBundle.modules.forEach(function(mod) { bp.write(mod); });
   bp.end();
@@ -55,7 +59,8 @@ Bundler.prototype.stringify = function(bpBundle, options) {
 
 
 Bundler.prototype.printInfo = function(bpBundle) {
-  console.log(formatBundleInfo(bpBundle, configureBrowserPack(bpBundle, this._options)));
+  var bpOptions = buildBrowserPackOptions(bpBundle, buildOptions(this));
+  console.log(formatBundleInfo(bpBundle, bpOptions));
 };
 
 
@@ -64,8 +69,14 @@ Bundler.prototype.getId = function(moduleId) {
 };
 
 
-function configureBrowserPack(bpBundle, options) {
-  var bpOptions = utils.merge({}, options.browserPack);
+function buildOptions(bundler, options) {
+  var bpOptions = utils.merge({}, bundler._options, options);
+  return utils.merge(bpOptions, bpOptions.browserPack);
+}
+
+
+function buildBrowserPackOptions(bpBundle, options) {
+  var bpOptions = utils.merge({}, options);
   bpOptions.hasExports = bpBundle.exports.length !== 0;
   bpOptions.standaloneModule = bpBundle.exports;
 
@@ -98,8 +109,8 @@ function createBrowserPackModules(bundler, context) {
 }
 
 
-function configureIds(bundler, bpModules) {
-  if (!bundler._options.filePathAsId) {
+function configureIds(bundler, bpModules, bpOptions) {
+  if (!bpOptions.filePathAsId) {
     bpModules.forEach(function(bpModule) {
       bpModule.id = bundler.getId(bpModule.id);
 
@@ -124,6 +135,17 @@ function configureEntries(bundler, bpModules, bpExports) {
 }
 
 
+function configureSourceMap(bundler, bpModules, bpOptions) {
+  if (bpOptions.sourceMap === false) {
+    bpModules.forEach(function(mod) {
+      mod.nomap = true;
+    });
+  }
+
+  return bpModules;
+}
+
+
 function getBrowserPackExports(bundler, context) {
   var ids = context.modules.map(function(mod) { return mod.id; });
   return convertModuleIds(bundler, ids);
@@ -132,11 +154,12 @@ function getBrowserPackExports(bundler, context) {
 
 function createBrowserPackModule(mod) {
   var bpModule = {
-    id     : mod.id,
-    name   : mod.name,
-    path   : mod.path,
-    source : mod.source,
-    deps   : {}
+    id         : mod.id,
+    name       : mod.name,
+    path       : mod.path,
+    source     : mod.source,
+    sourceFile : path.relative(".", mod.path),
+    deps       : {}
   };
 
   var i, length, dep;
