@@ -37,24 +37,20 @@ Bundler.prototype.bundle = function(context, options) {
     this.printInfo(bpBundle);
   }
 
-  return this.stringify(bpBundle, bpOptions).then(function(result) {
-    //
-    // Force converting Buffer to string to prevent buffers from causing
-    // issues with utils.merge.
-    // https://github.com/MiguelCastillo/belty/issues/13
-    //
-    return utils.extend({ result: "" + result }, bpBundle);
+  return new Promise(function(resolve) {
+    var bp = browserPack(buildBrowserPackOptions(bpBundle, bpOptions));
+    var deferred = pstream(bp);
+
+    bpBundle.modules.forEach(function(mod) {
+      bp.write(mod);
+    });
+
+    bp.end();
+
+    return deferred.then(function(result) {
+      return resolve(utils.extend({ result: result }, bpBundle));
+    });
   });
-};
-
-
-Bundler.prototype.stringify = function(bpBundle, options) {
-  var bpOptions = buildBrowserPackOptions(bpBundle, buildOptions(this, options));
-  var bp = browserPack(bpOptions);
-  var deferred = pstream(bp);
-  bpBundle.modules.forEach(function(mod) { bp.write(mod); });
-  bp.end();
-  return deferred;
 };
 
 
@@ -89,7 +85,7 @@ function buildBrowserPackOptions(bpBundle, options) {
 
 
 function createBrowserPackModules(bundler, context) {
-  var excludeMap = arrayToMap(context.exclude);
+  var excludeMap = utils.arrayToObject(context.exclude);
   var stack = context.modules.slice(0);
   var result = [], processed = {}, i = 0, mod;
 
@@ -125,7 +121,7 @@ function configureIds(bundler, bpModules, bpOptions) {
 
 
 function configureEntries(bundler, bpModules, bpExports) {
-  var exports = arrayToMap(bpExports);
+  var exports = utils.arrayToObject(bpExports);
 
   bpModules.forEach(function(mod) {
     mod.entry = exports.hasOwnProperty(mod.id);
@@ -147,8 +143,9 @@ function configureSourceMap(bundler, bpModules, bpOptions) {
 
 
 function getBrowserPackExports(bundler, context) {
-  var ids = context.modules.map(function(mod) { return mod.id; });
-  return convertModuleIds(bundler, ids);
+  return context.modules.map(function(mod) {
+    return bundler.getId(mod.id);
+  });
 }
 
 
@@ -172,11 +169,6 @@ function createBrowserPackModule(mod) {
 }
 
 
-function convertModuleIds(bundler, ids) {
-  return ids.map(function(id) { return bundler.getId(id); });
-}
-
-
 function formatBundleInfo(bpBundle, options) {
   var output = {};
   var bpModules = bpBundle.modules;
@@ -196,18 +188,6 @@ function formatBundleInfo(bpBundle, options) {
   });
 
   return output;
-}
-
-
-/**
- * Converts array to a map. The resulting map can be used for quick lookup
- * that is more efficient than calling indexOf on the array.
- */
-function arrayToMap(items) {
-  return items.reduce(function(container, item) {
-    container[item] = true;
-    return container;
-  }, {});
 }
 
 
