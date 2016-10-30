@@ -2,6 +2,7 @@
   "printInfo": false,
   "filePathAsId": false,
   "sourceMap": true,
+  "exportNames": false,
   "browserPack": {
     "raw": true,
     "hasExports": true,
