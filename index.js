@@ -1,6 +1,6 @@
 var defaultOptions = require("./defaultOptions");
 var browserPack = require("browser-pack");
-var getUniqueId = require("bit-bundler-utils/getUniqueId");
+var uniqueId = require("bit-bundler-utils/uniqueId");
 var pstream = require("p-stream");
 var utils = require("belty");
 var path = require("path");
@@ -12,7 +12,6 @@ function Bundler(options) {
   }
 
   this._options = utils.merge({}, defaultOptions, options);
-  this._getId = this._options.filePathAsId ? utils.noop : getUniqueId;
 }
 
 
@@ -22,7 +21,7 @@ Bundler.prototype.bundle = function(context, options) {
   }
 
   var bpOptions = buildOptions(this, options);
-  var bpExports = getBrowserPackExports(this, context);
+  var bpExports = getBrowserPackExports(this, context, bpOptions);
   var bpModules = createBrowserPackModules(this, context);
   bpModules = configureIds(this, bpModules, bpOptions);
   bpModules = configureEntries(this, bpModules, bpExports);
@@ -61,7 +60,12 @@ Bundler.prototype.printInfo = function(bpBundle) {
 
 
 Bundler.prototype.getId = function(moduleId) {
-  return this._getId(moduleId);
+  return uniqueId.getId(moduleId);
+};
+
+
+Bundler.prototype.setId = function(moduleId, value) {
+  uniqueId.setId(moduleId, value);
 };
 
 
@@ -142,8 +146,12 @@ function configureSourceMap(bundler, bpModules, bpOptions) {
 }
 
 
-function getBrowserPackExports(bundler, context) {
+function getBrowserPackExports(bundler, context, bpOptions) {
   return context.modules.map(function(mod) {
+    if (/^\w/.test(mod.name) && bpOptions.exportNames) {
+      bundler.setId(mod.id, mod.name);
+    }
+
     return bundler.getId(mod.id);
   });
 }
