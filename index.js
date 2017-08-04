@@ -46,8 +46,8 @@ Bundler.prototype.bundle = function(context, options) {
 
     bp.end();
 
-    return deferred.then(function(result) {
-      return resolve(utils.extend({ result: result }, bpBundle));
+    return deferred.then(function(content) {
+      return resolve(utils.extend({ content: content }, bpBundle));
     });
   });
 };
