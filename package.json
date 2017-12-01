@@ -1,10 +1,9 @@
 {
   "name": "bit-bundler-browserpack",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Bit bundler for JavaScript assets",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [
     "bit-bundler",
     "bit-bundler-plugin"
