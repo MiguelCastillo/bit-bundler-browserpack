@@ -1,4 +1,6 @@
 # bit-bundler-browserpack
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/MiguelCastillo/bit-bundler-browserpack.svg)](https://greenkeeper.io/)
 [bit-bundler](https://github.com/MiguelCastillo/bit-bundler) bundler provider to create JavaScript bundles. This bundler provider uses [browser-pack](https://github.com/substack/browser-pack) as the backing bundle generator.
 
 ### Options
